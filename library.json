@@ -1,0 +1,25 @@
+{
+  "name": "TLC5947-SPI",
+  "keywords": "tlc5947, spi, pwm, led",
+  "description": "Arduino library for controlling the TLC5947 PWM controller via SPI. Based on the AdaFruit_TLC5947 library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TCBroad/tlc5947-spi.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Tom Broad",
+      "email": "tcbroad@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "dependencies":
+  [
+    {
+      "name": "SPI"
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": [ "esp8266", "atmelavr", "ststm32" ]
+}
