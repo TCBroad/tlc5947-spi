@@ -5,15 +5,16 @@
 #include <SPI.h>
 #include "TLC5947_SPI.h"
 
-TLC5947_SPI::TLC5947_SPI(uint16_t num, uint8_t pin) {
+TLC5947_SPI::TLC5947_SPI(uint16_t num, uint8_t pin, LedMode mode) {
     this->numdrivers = num;
     this->pin = pin;
+    this->mode = mode;
 
     this->pwmbuffer = (uint16_t *) malloc(2 * 24 * num);
     memset(this->pwmbuffer, 0, 2 * 24 * num);
 }
 
-void TLC5947_SPI::begin(void) {
+void TLC5947_SPI::begin() {
     pinMode(MOSI, OUTPUT);
     pinMode(SCK, OUTPUT);
 
@@ -37,25 +38,22 @@ void TLC5947_SPI::setPWM(uint16_t chan, uint16_t pwm) {
 }
 
 void TLC5947_SPI::setLED(uint16_t lednum, uint16_t r, uint16_t g, uint16_t b) {
-    this->setPWM(lednum * 3, r);
+    this->setPWM(lednum * 3, this->mode == RGB ? r : b);
     this->setPWM(lednum * 3 + 1, g);
-    this->setPWM(lednum * 3 + 2, b);
+    this->setPWM(lednum * 3 + 2, this->mode == RGB ? b : r);
 }
 
 void TLC5947_SPI::write() {
-    SPI.beginTransaction(SPISettings(30000000, MSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
     digitalWrite(pin, LOW);
     // 24 channels per TLC5974
     for (int16_t c = 24 * numdrivers - 1; c >= 0; c -= 2) {
         // 12 bits per channel, send MSB first
         // have to split a pair of channels into groups of 3 bytes
-        uint8_t data1 = (pwmbuffer[c] >> 4) & 0x00FF;
-        uint8_t data2 = ((pwmbuffer[c] << 4) & 0x00F0) | ((pwmbuffer[c - 1] >> 4) & 0x000F);
-        uint8_t data3 = (pwmbuffer[c - 1] & 0x00FFu);
 
-        SPI.transfer(this->pin, data1, SPI_CONTINUE);
-        SPI.transfer(this->pin, data2, SPI_CONTINUE);
-        SPI.transfer(this->pin, data3, c > 0 ? SPI_CONTINUE : SPI_LAST);
+        SPI.transfer(this->pin, (pwmbuffer[c] >> 4) & 0x00FF, SPI_CONTINUE);
+        SPI.transfer(this->pin, ((pwmbuffer[c] << 4) & 0x00F0) | ((pwmbuffer[c - 1] >> 8) & 0x000F), SPI_CONTINUE);
+        SPI.transfer(this->pin, (pwmbuffer[c - 1] & 0x00FF), c > 0 ? SPI_CONTINUE : SPI_LAST);
     }
 
     digitalWrite(pin, HIGH);
