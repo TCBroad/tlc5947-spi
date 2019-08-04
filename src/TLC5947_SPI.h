@@ -20,8 +20,8 @@
 // Created by tombr on 24/07/2019.
 //
 
-#ifndef BLINK_GDB_TLC5947_SPI_H
-#define BLINK_GDB_TLC5947_SPI_H
+#ifndef TLC5947_SPI_H
+#define TLC5947_SPI_H
 
 #include <Arduino.h>
 
@@ -49,4 +49,4 @@ private:
 };
 
 
-#endif //BLINK_GDB_TLC5947_SPI_H
+#endif //TLC5947_SPI_H
